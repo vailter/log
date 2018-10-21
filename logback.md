@@ -136,7 +136,7 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
 
 获取时间戳字符串
 
-两个属性 key：标识此**`timestamp`** 的名字；`datePattern`：设置将当前时间（解析配置文件的时间）转换为字符串的模式，遵循`java.txt.SimpleDateFormat`的格式。
+两个属性 key：标识此`timestamp` 的名字；`datePattern`：设置将当前时间（解析配置文件的时间）转换为字符串的模式，遵循`java.txt.SimpleDateFormat`的格式。
 
 例如将解析配置文件的时间作为上下文名称：
 
@@ -435,7 +435,7 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
 
      - `SizeBasedTriggeringPolicy`
 
-       查看当前活动文件的大小，如果超过指定大小会告知**RollingFileAppender** 触发当前活动文件滚动。只有一个节点**:**
+       查看当前活动文件的大小，如果超过指定大小会告知**RollingFileAppender** 触发当前活动文件滚动。只有一个节点：
 
        - &lt;maxFileSize&gt;:这是活动文件的大小，默认值是10MB。
 
