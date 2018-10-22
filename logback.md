@@ -118,7 +118,7 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
 </configuration>
 ```
 
-### 子节点**`property`**
+### 子节点`property`
 
 用来定义变量值的标签，`property` 有两个属性，`name`和`value`；其中name的值是变量的名称，value的值时变量定义的值。通过`property`定义的值会被插入到logger上下文中。定义变量后，可以使“${}”来使用变量。
 
@@ -507,7 +507,7 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
 
   参考：https://logback.qos.ch/manual/layouts.html#conversionWord
 
- **格式修饰符，与转换符共同使用：**
+ **格式修饰符，与转换符共同使用**：
 
    可选的格式修饰符位于“%”和转换符之间。
 
@@ -655,6 +655,20 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
         </filter>
     </appender>
 
+	<!--
+	它是 子Logger 是否继承 root的Logger 的 输出源（appender） 的标志位。
+	具体说，默认情况下子Logger会继承root的Logger的appender，也就是说子Logger会在root的Logger的appender里输出。
+	1.若是additivity设为false，则子Logger只会在自己的appender里输出，
+	不会在root的logger的appender里输出（个人可以理解为additivity设为false后，子Logger会覆盖掉root的logger）。
+
+	2.若是additivity设为true，则子Logger不止会在自己的appender里输出，还会在root的logger的appender里输出
+ 	如果将
+	<logger name="logback.LogbackDemo" level="INFO" additivity="false">
+	修改为 
+	<logger name="logback.LogbackDemo" level="INFO" additivity="true">
+	那打印结果将是什么呢？
+	没错，日志打印了两次，想必大家都知道原因了，因为打印信息向上级传递，logger本身打印一次，root接到后又打印一次。
+	-->
     <!--<logger> 用来设置某一个包或者具体的某一个类的日志打印级别、以及指定<appender>。
         <logger>仅有一个name属性，一个可选的level和一个可选的additivity属性。
         name:用来指定受此logger约束的某一个包或者具体的某一个类。
