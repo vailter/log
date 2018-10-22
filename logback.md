@@ -516,6 +516,83 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
    例如：%-4relative 表示，将输出从程序启动到创建日志记录的时间 进行左对齐 且最小宽度为4。
 
 4. 另外还有SocketAppender、SMTPAppender、DBAppender、SyslogAppender、SiftingAppender，并不常用，这些就不在这里讲解了，大家可以参考官方文档。当然大家可以编写自己的Appender。
+5. `appender`节点：
+	- filter
+		Logback 的过滤器基于三值逻辑（ternary logic），允许把它们组装或成链，从而组成任 意的复合过滤策略。
+		这里的所谓三值逻辑是说，过滤器的返回值只能是 ACCEPT、DENY 和 NEUTRAL 的其中一个。
+		过滤器一般分为如下几类：
+		+ 级别过滤器（==LevelFilter==）
+			LevelFilter 根据记录级别对记录事件进行过滤。如果事件的级别等于配置的级别，过滤 器会根据 onMatch 和 onMismatch 属性接受或拒绝事件。
+			下面是个配置文件例子：
+			```xml
+			<?xml version="1.0" encoding="utf-8"?>
+			<configuration>
+				  <!-- conf consoel out -->
+				  <appender name ="console_out" class="ch.qos.logback.core.ConsoleAppender">
+					  <filter class="ch.qos.logback.classic.filter.LevelFilter">
+						  <!-- 过滤掉非INFO级别 -->
+						  <level>INFO</level>
+						  <!-- 用于配置符合过滤条件的操作 -->
+						  <onMatch>ACCEPT</onMatch>
+						  <!-- 用于配置不符合过滤条件的操作 -->
+						  <!-- 将过滤器的日志级别配置为INFO，所有INFO级别的日志交给appender处理，非INFO级别的日志，被过滤掉。 -->
+						  <onMismatch>DENY</onMismatch>
+					 </filter>
+
+					 <encoder>
+						 <pattern>%-4relative [%thread] %-5level %logger{30} - %msg%n</pattern>
+					 </encoder>
+				 </appender>
+				<root level="DEBUG">
+					 <appender-ref ref="console_out" />
+				 </root>
+			</configuration>
+			```
+		+ 临界值过滤器（`ThresholdFilter`）
+			ThresholdFilter 过滤掉低于指定临界值的事件 . 当记录的级别等于或高于临界值时 , ThresholdFilter 的decide()方法会返回NEUTRAL ; 当记录级别低于临界值时 , 事件会被拒绝 
+			下面是个配置文件例子 : 
+			 ```xml
+			 <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+				 <!-- 过滤掉TRACE和DEBUG级别的日志 -->
+				 <level>INFO</level>
+			 </filter>
+			 ```
+			
+		+ 求值过滤器（`EvaluatorFilter`）
+			EvaluatorFilter封装了EventEvaluator（ch.qos.logback.core.boolex.EventEvaluator) , 评估 是否符合指定的条件：
+			```xml
+			<filter class="ch.qos.logback.classic.filter.EvaluatorFilter">  
+              <evaluator>
+				  <!--过滤掉所有日志中不包含hello字符的日志-->
+                 <expression>
+                     message.contains("hello")
+                </expression>                 
+				<onMatch>NEUTRAL</onMatch>
+                 <onMismatch>DENY</onMismatch>
+              </evaluator>
+			</filter>
+			```
+## lagback执行流程
+logback 执行流程 :
+
+1. 获得过滤链的策略
+	依据过滤器链返回的结果做出不同的响应。共有三个响应结果：
+	FilterReply.DENY, 直接退出，不执行后续流程
+	FilterReply.NEUTRA，继续向下执行
+	FilterReply.ACCEPT，不进行步骤二,即类型输出类型检查
+2. 执行基本的选择规则
+	主要是比较下level，如果级别低直接退出后续执行
+3. 创建LoggingEvent对象
+	这个对象包裹一些基本信息，包括日志界别，信息本身，可能的异常信息，执行时间，执行线程，其实一些随日志请求一起发出的数据和MDC。其中MDC是用来装一些额外的上下文信息的。
+
+4. 调用appenders
+	此时logback会调用appender的doAppender，如果appender里有一些filer的话，此时也会调用
+
+5. 格式化输出结果
+	通常情况下都是由layout层将event格式化成String型。当然也有意外比如说SocketAppender就是将event格式化成流。
+
+6. 输出LoggingEvent
+	将格式化好的结果，输出到appender中记录的地址
 
 ## logback配置总览
 
@@ -632,7 +709,7 @@ Logback是由log4j创始人设计的另一个开源日志组件,官方网站：h
             <pattern>${consoleLayoutPattern}</pattern>
         </layout>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <!--关于过滤器onMatch表示匹配大于这个级别的日志和onMismatch表示匹配小于于这个级别的日志,可以选的有
+            <!--
                 ACCEPT–打印
                 DENY– 不打印
                 NEUTRAL–中立-->
